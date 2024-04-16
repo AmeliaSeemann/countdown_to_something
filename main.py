@@ -73,16 +73,9 @@ def main_function(events_file,version_name):
                     previous = f1.readlines()
                 f1.close()
                 events_number = int(previous[0])
-                events_number+=1
-                new = [str(events_number),"\n"]
-                counter=0
-                for stuff in previous:
-                    if counter>0:
-                        new.append(stuff)
-                    counter+=1
-                with open(events_file, "w") as f:
-                    f.writelines(new)
+
                 if events_number<9:
+
                     bad_stuff = ["ł", "Ł", "ę", "ó", "ą", "ś", "ż", "ź", "ć", "ń", 'Ł', "Ę", "Ó", "Ą", "Ś", "Ż", "Ź",
                                  "Ć", "Ń"]
                     na = (self.name.text())
@@ -110,6 +103,15 @@ def main_function(events_file,version_name):
                     if ye<0:
                         message+="Don't try being funny with the year...\n"
                     if message=="":
+                        events_number += 1
+                        new = [str(events_number), "\n"]
+                        counter = 0
+                        for stuff in previous:
+                            if counter > 0:
+                                new.append(stuff)
+                            counter += 1
+                        with open(events_file, "w") as f:
+                            f.writelines(new)
                         new_event = Event(ho,mi,da,mo,na,ye,st)
                         new_event.save_to_file()
                     else:
@@ -312,15 +314,19 @@ def main_function(events_file,version_name):
 
 def get_file_name():
     try:
-        print("Provide a savefile name [without .txt], then press enter")
-        print("(If you leave this empty, the default savefile [events.txt] will be used)")
+        print("Provide a savefile name [without .txt], then press Enter.")
+        print("(If the file doesn't exist, it will be created.)")
+        print("(If you leave this empty, the default savefile [events.txt] will be used.)")
         savefile = input()
         savefile+=".txt"
         if savefile==".txt":
             main_function("events.txt", "1.0")
-        main_function(savefile,"1.0")
+        else:
+            main_function(savefile,"1.0")
     except FileNotFoundError:
-        print("No such file in this folder...\n\n")
-        get_file_name()
+        new_savefile = open(savefile,"a")
+        new_savefile.writelines(["0","\n"])
+        new_savefile.close()
+        main_function(savefile, "1.0")
 if __name__=="__main__":
     get_file_name()
