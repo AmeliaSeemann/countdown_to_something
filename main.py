@@ -69,9 +69,6 @@ class Load(QMainWindow):
                 new_file=open(self.events_file,'a')
                 new_file.writelines(["0", "\n"])
                 new_file.close()
-                a=new_file.readlines()
-                print(a)
-                new_file.close()
             self.move_to_main()
     def move_to_main(self):
         mainwindow = Main(self.events_file)
@@ -103,15 +100,6 @@ class Add(QMainWindow):
                     previous = f1.readlines()
                 f1.close()
                 events_number = int(previous[0])
-                events_number+=1
-                new = [str(events_number),"\n"]
-                counter=0
-                for stuff in previous:
-                    if counter>0:
-                        new.append(stuff)
-                    counter+=1
-                with open(self.events_file, "w") as f:
-                    f.writelines(new)
                 if events_number<9:
                     bad_stuff = ["ł", "Ł", "ę", "ó", "ą", "ś", "ż", "ź", "ć", "ń", 'Ł', "Ę", "Ó", "Ą", "Ś", "Ż", "Ź",
                                  "Ć", "Ń"]
@@ -140,6 +128,16 @@ class Add(QMainWindow):
                     if ye<0:
                         message+="Don't try being funny with the year...\n"
                     if message=="":
+                        events_number += 1
+                        new = [str(events_number), "\n"]
+                        counter = 0
+                        for stuff in previous:
+                            if counter > 0:
+                                new.append(stuff)
+                            counter += 1
+                        with open(self.events_file, "w") as f:
+                            f.writelines(new)
+
                         new_event = Event(ho,mi,da,mo,na,ye,st)
                         new_event.save_to_file(self.events_file)
                     else:
