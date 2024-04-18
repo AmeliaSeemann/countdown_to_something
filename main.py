@@ -1,10 +1,10 @@
-def main_function(events_file,version_name):
-    import csv
-    import datetime
-    import time
-    date_format = '%Y-%m-%d %H:%M:%S'
 
-    class Event:
+import csv
+import datetime
+import time
+date_format = '%Y-%m-%d %H:%M:%S'
+
+class Event:
         def __init__(self,ho,mi,da,mo,name,ye,st):
             self.date = datetime.datetime(year=ye,month=mo,day=da,hour=ho,minute=mi)
             self.name = name
@@ -39,24 +39,54 @@ def main_function(events_file,version_name):
             minutes =  int((self.diff.seconds - hours*3600)/60)
             return ("{} days, {} hours and {} minutes.".format(self.diff.days,hours,minutes))
 
-        def save_to_file(self):
+        def save_to_file(self,events_file):
             f = open(events_file, "a")
             f.write(self.show()+"\n")
             f.close()
 
 
-    from PyQt5 import QtCore, QtWidgets
-    from PyQt5.uic import loadUi
-    from PyQt5.QtWidgets import QApplication,QMainWindow,QPushButton,QLabel
-    import sys
+from PyQt5 import QtCore, QtWidgets
+from PyQt5.uic import loadUi
+from PyQt5.QtWidgets import QApplication,QMainWindow,QPushButton,QLabel
+import sys
 
+class Load(QMainWindow):
+    def __init__(self):
+        super(Load, self).__init__()
+        loadUi("load.ui", self)
+        self.load.clicked.connect(self.load_a_file)
+        self.give_name.setText("")
+        self.events_file = ""
 
-    class Add(QMainWindow):
-        def __init__(self):
+    def load_a_file(self):
+        if self.give_name.text()!="":
+            self.events_file=self.give_name.text()
+            self.events_file+=".txt"
+            try:
+                existing_file = open(self.events_file,'r')
+                existing_file.close()
+            except FileNotFoundError:
+                new_file=open(self.events_file,'a')
+                new_file.writelines(["0", "\n"])
+                new_file.close()
+                a=new_file.readlines()
+                print(a)
+                new_file.close()
+            self.move_to_main()
+    def move_to_main(self):
+        mainwindow = Main(self.events_file)
+        widget.addWidget(mainwindow)
+        widget.setCurrentIndex(widget.currentIndex() + 1)
+        mainwindow.update(False)
+
+class Add(QMainWindow):
+        def __init__(self,ef,mainwindow):
             super(Add,self).__init__()
             loadUi("add.ui",self)
+            self.mainwindow=mainwindow
             self.number_of_events=0
             self.input_warning.hide()
+            self.events_file=ef
             self.go_back.clicked.connect(self.goback)
             self.pushadd.clicked.connect(self.add_event)
 
@@ -64,18 +94,25 @@ def main_function(events_file,version_name):
             widget.setCurrentIndex(widget.currentIndex() - 1)
             self.warning.hide()
             self.input_warning.hide()
-            mainwindow.update(False)
+            self.mainwindow.update(False)
 
         def add_event(self):
                 self.input_warning.hide()
                 self.warning.hide()
-                with open(events_file, "r") as f1:
+                with open(self.events_file, "r") as f1:
                     previous = f1.readlines()
                 f1.close()
                 events_number = int(previous[0])
-
+                events_number+=1
+                new = [str(events_number),"\n"]
+                counter=0
+                for stuff in previous:
+                    if counter>0:
+                        new.append(stuff)
+                    counter+=1
+                with open(self.events_file, "w") as f:
+                    f.writelines(new)
                 if events_number<9:
-
                     bad_stuff = ["ł", "Ł", "ę", "ó", "ą", "ś", "ż", "ź", "ć", "ń", 'Ł', "Ę", "Ó", "Ą", "Ś", "Ż", "Ź",
                                  "Ć", "Ń"]
                     na = (self.name.text())
@@ -103,26 +140,18 @@ def main_function(events_file,version_name):
                     if ye<0:
                         message+="Don't try being funny with the year...\n"
                     if message=="":
-                        events_number += 1
-                        new = [str(events_number), "\n"]
-                        counter = 0
-                        for stuff in previous:
-                            if counter > 0:
-                                new.append(stuff)
-                            counter += 1
-                        with open(events_file, "w") as f:
-                            f.writelines(new)
                         new_event = Event(ho,mi,da,mo,na,ye,st)
-                        new_event.save_to_file()
+                        new_event.save_to_file(self.events_file)
                     else:
                         self.input_warning.setText(message)
                         self.input_warning.show()
                 else:
                     self.warning.show()
 
-    class Main(QMainWindow):
-        def __init__(self):
+class Main(QMainWindow):
+        def __init__(self,ef):
             super(Main, self).__init__()
+            self.events_file=ef
             loadUi("view.ui", self)
             self.aac.clicked.connect(self.adding)
             self.up.clicked.connect(lambda:self.update(False))
@@ -149,7 +178,7 @@ def main_function(events_file,version_name):
                 self.info_button = QPushButton(widget)
                 self.info_button.setGeometry(30,35,200,160)
                 self.info_button.setStyleSheet('font: 7pt "MS Shell Dlg 2";color: rgb(255, 255, 255);background-color: rgb(57, 57, 86);')
-                self.info_button.setText("Version:\n{}\n\nEvents file:\n{}\n\n(press to hide)".format(version_name,events_file))
+                self.info_button.setText("\nEvents file:\n{}\n\n(press to hide)".format(self.events_file))
                 self.info_button.show()
                 self.info_button.clicked.connect(self.hide_version_info)
 
@@ -162,7 +191,7 @@ def main_function(events_file,version_name):
             self.info_button2.hide()
 
         def adding(self):
-            adding = Add()
+            adding = Add(self.events_file,self)
             widget.addWidget(adding)
             now = datetime.datetime.now()
             widget.setCurrentIndex(widget.currentIndex() + 1)
@@ -186,7 +215,7 @@ def main_function(events_file,version_name):
             which_one.hide()
             button_text = (which_one.text())
             split_text = button_text.split(":")
-            with open(events_file,"r") as file:
+            with open(self.events_file,"r") as file:
                 events_content = file.readlines()
             events_number = int(events_content[0])
             events_number-=1
@@ -204,10 +233,10 @@ def main_function(events_file,version_name):
                         list_of_contents[counter] = "\n"
                         break
                 counter+=1
-            with open(events_file,"w") as file_again:
+            with open(self.events_file,"w") as file_again:
                 file_again.writelines(list_of_contents)
             file.close()
-            mainwindow.update(False)
+            self.update(False)
 
         def style_sample(self,what,style):
             what.sample.setStyleSheet(style)
@@ -220,8 +249,8 @@ def main_function(events_file,version_name):
             self.deleting.clicked.connect(lambda: self.update(True))
             self.deleting.setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(57, 57, 86);")
             import os
-            if os.stat(events_file).st_size != 0:
-                with open(events_file, "r") as file1:
+            if os.stat(self.events_file).st_size != 0:
+                with open(self.events_file, "r") as file1:
                     reader = csv.reader(file1,delimiter='+')
                     counter = 0
                     buttons2= []
@@ -301,32 +330,13 @@ def main_function(events_file,version_name):
 
 
 
-    app = QApplication(sys.argv)
-    app.setApplicationName("CountdownToSomething")
-    mainwindow = Main()
-    widget = QtWidgets.QStackedWidget()
-    widget.addWidget(mainwindow)
-    widget.setFixedWidth(600)
-    widget.setFixedHeight(1000)
-    mainwindow.update(False)
-    widget.show()
-    app.exec_()
+app = QApplication(sys.argv)
+app.setApplicationName("CountdownToSomething")
+loadwindow = Load()
+widget = QtWidgets.QStackedWidget()
+widget.addWidget(loadwindow)
+widget.setFixedWidth(600)
+widget.setFixedHeight(1000)
+widget.show()
+app.exec_()
 
-def get_file_name():
-    try:
-        print("Provide a savefile name [without .txt], then press Enter.")
-        print("(If the file doesn't exist, it will be created.)")
-        print("(If you leave this empty, the default savefile [events.txt] will be used.)")
-        savefile = input()
-        savefile+=".txt"
-        if savefile==".txt":
-            main_function("events.txt", "1.0")
-        else:
-            main_function(savefile,"1.0")
-    except FileNotFoundError:
-        new_savefile = open(savefile,"a")
-        new_savefile.writelines(["0","\n"])
-        new_savefile.close()
-        main_function(savefile, "1.0")
-if __name__=="__main__":
-    get_file_name()
