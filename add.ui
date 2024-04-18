@@ -358,11 +358,11 @@ background-color: rgb(57, 57, 86);</string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 9pt &quot;Verdana&quot;;background-color: rgb(255, 255, 255);color: rgb(0, 0, 0);
+     <string notr="true">font: 8pt &quot;Verdana&quot;;background-color: rgb(255, 255, 255);color: rgb(0, 0, 0);
 </string>
     </property>
     <property name="text">
-     <string>SAMPLE</string>
+     <string>PREVIEW</string>
     </property>
    </widget>
    <widget class="QPushButton" name="s6">
@@ -400,26 +400,26 @@ background-color: rgb(57, 57, 86);</string>
    <widget class="QLabel" name="warning">
     <property name="geometry">
      <rect>
-      <x>90</x>
+      <x>50</x>
       <y>690</y>
-      <width>471</width>
+      <width>491</width>
       <height>161</height>
      </rect>
     </property>
     <property name="styleSheet">
      <string notr="true">color: rgb(255, 255, 255);
-font: 75 20pt &quot;Verdana&quot;;</string>
+font: 75 14pt &quot;Verdana&quot;;</string>
     </property>
     <property name="text">
-     <string>   YOU CAN'T HAVE
-ANY MORE EVENTS!!!</string>
+     <string>   You can't have any more events 
+              in this save file!</string>
     </property>
    </widget>
    <widget class="QLabel" name="input_warning">
     <property name="geometry">
      <rect>
-      <x>60</x>
-      <y>720</y>
+      <x>50</x>
+      <y>680</y>
       <width>471</width>
       <height>161</height>
      </rect>
